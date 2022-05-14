@@ -40,11 +40,7 @@ class _TextWidgetState extends State<TextWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text("interactive text")),
-      body: Padding(
-        padding: const EdgeInsets.all(18.0),
-        child: Column(
+    return Column(
           mainAxisAlignment: MainAxisAlignment.start,
           children: [
             SizedBox(height: 10),
@@ -52,9 +48,8 @@ class _TextWidgetState extends State<TextWidget> {
             SizedBox(height: 10),
             previewWidget(),
           ],
-        ),
-      ),
-    );
+        );
+    
   }
 
   Widget textArea()

@@ -1,39 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:interactive_text/model/predictionItem.dart';
-import 'package:interactive_text/widgets/textwidget.dart';
+import 'package:interactive_text/root.dart';
 
 void main() {
-  runApp(MyApp());
-}
-
-class MyApp extends StatelessWidget {
-  final predictionList = [
-  {
-    "trigger" : "cat",
-    "suggestions": ["tuna", "mice"]
-  },
-  {
-    "trigger" : "dog",
-    "suggestions": ["bones", "carrots"]
-  },
-  {
-    "trigger" : "mouse",
-    "suggestions": ["cheese", "apple"]
-  }
-  ].map((e) => PredictionItem.fromJson(e)).toList();
-  MyApp({Key? key}) : super(key: key);
-
-  // This widget is the root of your application.
-  @override
-  Widget build(BuildContext context) {
-  
-
-  return MaterialApp(
-      title: 'interactive text',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
-      home: TextWidget(predictionList: predictionList,),
-    );
-  }
+  runApp(const Root());
 }

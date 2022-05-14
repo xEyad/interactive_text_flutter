@@ -19,6 +19,7 @@ class _PredictionWordState extends State<PredictionWord> {
   @override
   Widget build(BuildContext context) {
     return PopupMenuButton(
+      tooltip: "Show suggestions",
       child: content(),
       itemBuilder: (context)=>foods.map((e) => PopupMenuItem(child:Text(e),value: e,onTap: (){
         setState(() {
@@ -47,7 +48,6 @@ class _PredictionWordState extends State<PredictionWord> {
             Text(species,style: TextStyle(color: clr),),
             selection==null ? SizedBox() : Text(selection!,style: TextStyle(color: clr))
           ]),
-          // Icon(Icons.arrow_drop_down,color: clr,)
         ],
       ),
     );
