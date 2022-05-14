@@ -10,3 +10,7 @@ or follow the steps below:
 1. copy contents of build/web to docs/
 1. duplicate your index.html and rename it to 404.html
 1. git push
+
+# demo
+1. find interactive link: https://xeyad.github.io/interactive_text_flutter/
+1. check demo video in docs/demo.mp4
