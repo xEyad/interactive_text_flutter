@@ -43,7 +43,15 @@ class _HomeScreenState extends State<HomeScreen> {
       ]),      
       body: Padding(
         padding: const EdgeInsets.all(18.0),
-        child: TextWidget(predictionList: predictionList)
+        child: Column(
+          children: [
+            Text(
+"""Start typing words in the Text area and the preview widget will render all words typed.
+however, if it found any of these words: -- cat,dog,mouse -- it will render them differently cause these words gives you suggestions.
+click on the words, to open and pick a suggestion. """),
+            TextWidget(predictionList: predictionList),
+          ],
+        )
       ),
     );
   }
