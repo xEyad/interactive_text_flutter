@@ -5,8 +5,10 @@ import 'package:interactive_text/widgets/previewPrediction.dart';
 class PredictionMakerField extends StatefulWidget {
   ///Sentence data will be read from that controller
   final TextEditingController textCtrl;
+  final VoidCallback? onDelete;
+  final String? initialTitle;
   final List<PredictionItem> predictionList;
-  PredictionMakerField({Key? key,this.predictionList = const [],required this.textCtrl}) : super(key: key);
+  PredictionMakerField({Key? key,this.predictionList = const [],required this.textCtrl, this.initialTitle, this.onDelete }) : super(key: key);
 
   @override
   State<PredictionMakerField> createState() => _PredictionMakerFieldState();
@@ -14,9 +16,14 @@ class PredictionMakerField extends StatefulWidget {
 
 class _PredictionMakerFieldState extends State<PredictionMakerField> {
   final borderRadiusValue = 10.0;
+  late TextEditingController titleCtrl;
 
-  void onDelete() {
+  @override
+  void initState() {
+    super.initState();
+    titleCtrl = TextEditingController(text: widget.initialTitle);
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -45,12 +52,17 @@ class _PredictionMakerFieldState extends State<PredictionMakerField> {
 
   Widget titleField()
   {
-    return Text("title",style: TextStyle(fontWeight: FontWeight.bold,fontSize: 18,color: Colors.grey[200]),);
+    return TextField(
+      decoration: InputDecoration(border: InputBorder.none,),
+      controller: titleCtrl,
+      textAlign: TextAlign.center,
+      style: TextStyle(fontSize: 18,color: Colors.grey[200]),
+    );
   }
 
   Widget deleteBtn()
   {
-    return IconButton(onPressed: onDelete, icon: Icon(Icons.delete),color: Colors.grey[200],tooltip: "Delete Item",);
+    return IconButton(onPressed: widget.onDelete, icon: Icon(Icons.delete),color: Colors.grey[200],tooltip: "Delete Item",);
   }
 
   Widget previewArea()

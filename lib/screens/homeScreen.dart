@@ -53,7 +53,7 @@ class _HomeScreenState extends State<HomeScreen> {
             SizedBox(height: 10,),
             textInput(),
             SizedBox(height: 10,),
-            PredictionMakerField(textCtrl: textCtrl,predictionList: predictionList)
+            PredictionMakerField(textCtrl: textCtrl,predictionList: predictionList,initialTitle: "Variable",)
           ],
         )
       ),
