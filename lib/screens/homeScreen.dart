@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:interactive_text/model/predictionItem.dart';
+import 'package:interactive_text/widgets/predicationMakerField.dart';
 import 'package:interactive_text/widgets/textwidget.dart';
 import 'package:url_launcher/url_launcher.dart';
 class HomeScreen extends StatefulWidget {
@@ -50,6 +51,8 @@ class _HomeScreenState extends State<HomeScreen> {
 however, if it found any of these words: -- cat,dog,mouse -- it will render them differently cause these words gives you suggestions.
 click on the words, to open and pick a suggestion. """),
             TextWidget(predictionList: predictionList),
+            SizedBox(height: 10,),
+            PredictionMakerField()
           ],
         )
       ),
