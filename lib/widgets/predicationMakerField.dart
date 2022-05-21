@@ -1,21 +1,20 @@
 import 'package:flutter/material.dart';
-import 'package:interactive_text/widgets/textwidget.dart';
+import 'package:interactive_text/model/predictionItem.dart';
+import 'package:interactive_text/widgets/previewPrediction.dart';
 
 class PredictionMakerField extends StatefulWidget {
-  PredictionMakerField({Key? key}) : super(key: key);
+  final List<PredictionItem> predictionList;
+  PredictionMakerField({Key? key,this.predictionList = const []}) : super(key: key);
 
   @override
   State<PredictionMakerField> createState() => _PredictionMakerFieldState();
 }
 
 class _PredictionMakerFieldState extends State<PredictionMakerField> {
-  List<Widget> previewItems = [];
   final borderRadiusValue = 10.0;
 
   void onDelete() {
   }
-
-
 
   @override
   Widget build(BuildContext context) {
@@ -49,24 +48,12 @@ class _PredictionMakerFieldState extends State<PredictionMakerField> {
 
   Widget deleteBtn()
   {
-    return IconButton(onPressed: onDelete, icon: Icon(Icons.delete),color: Colors.grey[200]);
+    return IconButton(onPressed: onDelete, icon: Icon(Icons.delete),color: Colors.grey[200],tooltip: "Delete Item",);
   }
 
   Widget previewArea()
   {
-    return Container(
-      width: double.infinity,
-      decoration: BoxDecoration(
-        color: Colors.grey[200],
-        borderRadius: BorderRadius.circular(10)
-      ),
-      padding: EdgeInsets.symmetric(horizontal:10,vertical: 30),
-      child: Wrap(
-        crossAxisAlignment: WrapCrossAlignment.center,
-        children: previewItems,
-      ),
-    );
+    return PreviewPrediction(predictionList: [], sentenceCtrl: TextEditingController() ,);   
   }
-
 
 }
