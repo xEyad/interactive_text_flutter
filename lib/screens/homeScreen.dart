@@ -3,8 +3,8 @@
 import 'package:flutter/material.dart';
 import 'package:interactive_text/model/predictionItem.dart';
 import 'package:interactive_text/widgets/predicationMakerField.dart';
-import 'package:interactive_text/widgets/textwidget.dart';
 import 'package:url_launcher/url_launcher.dart';
+
 class HomeScreen extends StatefulWidget {
   HomeScreen({Key? key}) : super(key: key);
 
@@ -14,6 +14,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
 
+  final textCtrl = TextEditingController();
   final predictionList = [
   {
     "trigger" : "cat",
@@ -48,16 +49,30 @@ class _HomeScreenState extends State<HomeScreen> {
         padding: const EdgeInsets.all(18.0),
         child: Column(
           children: [
-            Text(
-"""Start typing words in the Text area and the preview widget will render all words typed.
-however, if it found any of these words: -- cat,dog,mouse -- it will render them differently cause these words gives you suggestions.
-click on the words, to open and pick a suggestion. """),
-            TextWidget(predictionList: predictionList),
+            instructions(),
             SizedBox(height: 10,),
-            PredictionMakerField()
+            textInput(),
+            SizedBox(height: 10,),
+            PredictionMakerField(textCtrl: textCtrl,predictionList: predictionList)
           ],
         )
       ),
+    );
+  }
+
+  Widget instructions() {
+    return Text(
+"""Start typing words in the Text area and the preview widget will render all words typed.
+however, if it found any of these words: -- cat,dog,mouse -- it will render them differently cause these words gives you suggestions.
+click on the words, to open and pick a suggestion. """);
+  }
+
+  Widget textInput()
+  {
+    return TextField(        
+      decoration: InputDecoration(border: OutlineInputBorder(borderRadius: BorderRadius.circular(10))),
+      maxLines: 5,
+      controller: textCtrl,
     );
   }
 }

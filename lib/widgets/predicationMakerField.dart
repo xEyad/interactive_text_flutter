@@ -3,8 +3,10 @@ import 'package:interactive_text/model/predictionItem.dart';
 import 'package:interactive_text/widgets/previewPrediction.dart';
 
 class PredictionMakerField extends StatefulWidget {
+  ///Sentence data will be read from that controller
+  final TextEditingController textCtrl;
   final List<PredictionItem> predictionList;
-  PredictionMakerField({Key? key,this.predictionList = const []}) : super(key: key);
+  PredictionMakerField({Key? key,this.predictionList = const [],required this.textCtrl}) : super(key: key);
 
   @override
   State<PredictionMakerField> createState() => _PredictionMakerFieldState();
@@ -53,7 +55,7 @@ class _PredictionMakerFieldState extends State<PredictionMakerField> {
 
   Widget previewArea()
   {
-    return PreviewPrediction(predictionList: [], sentenceCtrl: TextEditingController() ,);   
+    return PreviewPrediction(predictionList: widget.predictionList, sentenceCtrl: widget.textCtrl ,);   
   }
 
 }
