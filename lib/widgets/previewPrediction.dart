@@ -1,12 +1,16 @@
+// ignore_for_file: curly_braces_in_flow_control_structures
+
 import 'package:flutter/material.dart';
 import 'package:interactive_text/model/predictionItem.dart';
 import 'package:interactive_text/widgets/predictionWord.dart';
 
 class PreviewPrediction extends StatefulWidget {
   final List<PredictionItem> predictionList;
+  ///this function runs whenever user selects option from prediction item
+  final void Function(PredictionItem,String)? onItemSelectionUpdated;
   ///Sentence data will be read from that controller
   final TextEditingController sentenceCtrl;
-  PreviewPrediction({Key? key, required this.predictionList, required this.sentenceCtrl}) : super(key: key);
+  const PreviewPrediction({Key? key, required this.predictionList, required this.sentenceCtrl, this.onItemSelectionUpdated}) : super(key: key);
 
   @override
   State<PreviewPrediction> createState() => _PreviewPredictionState();
@@ -15,9 +19,19 @@ class PreviewPrediction extends StatefulWidget {
 class _PreviewPredictionState extends State<PreviewPrediction> {
   
   List<PredictionItem> get predictionList => widget.predictionList;
+  //TODO: maintain this list and update it whenever item changes or gets deleted!
+  //TODO: maintain selection state
+  List<Map<PredictionItem,String>> itemsAndSelections = [];
 
   void controllerListener() { 
     setState(() {});
+  }
+
+  void onItemSelectionUpdated(PredictionItem item,String selection)
+  {
+    if(widget.onItemSelectionUpdated==null)
+      return;
+    widget.onItemSelectionUpdated!(item,selection);
   }
 
   @override
@@ -78,6 +92,11 @@ class _PreviewPredictionState extends State<PreviewPrediction> {
     ).toList();
   }
 
-  Widget predictionWord(PredictionItem? predictionObj) => Container(child: PredictionWord(predictionObj!),margin: EdgeInsets.only(right: 10),);
+  Widget predictionWord(PredictionItem? predictionObj)
+  {
+    return Container(
+      child: PredictionWord(predictionObj!,onSelectionChanged: (String selection)=>onItemSelectionUpdated(predictionObj,selection),),
+      margin: EdgeInsets.only(right: 10),);
+  }
   
 }

@@ -3,8 +3,9 @@ import 'package:interactive_text/model/predictionItem.dart';
 import 'package:interactive_text/widgets/previewPrediction.dart';
 
 class PredictionMakerField extends StatefulWidget {
+  final VoidCallback? onDelete;
   final PredictionMakerFieldController controller;
-  PredictionMakerField({Key? key,required this.controller }) : super(key: key);
+  PredictionMakerField({Key? key,required this.controller,this.onDelete }) : super(key: key);
 
   @override
   State<PredictionMakerField> createState() => _PredictionMakerFieldState();
@@ -12,7 +13,6 @@ class PredictionMakerField extends StatefulWidget {
 
 class _PredictionMakerFieldState extends State<PredictionMakerField> {
   final borderRadiusValue = 10.0;
-  late TextEditingController titleCtrl;
   PredictionMakerFieldController get controller => widget.controller;
 
   void controllerListener() { 
@@ -22,14 +22,12 @@ class _PredictionMakerFieldState extends State<PredictionMakerField> {
   @override
   void initState() {
     super.initState();
-    titleCtrl = TextEditingController(text: controller.initialTitle);
     controller.addListener(controllerListener);
   }
 
   @override
   void dispose() {
     controller.removeListener(controllerListener);
-    titleCtrl.dispose();
     super.dispose();
   }
 
@@ -63,7 +61,7 @@ class _PredictionMakerFieldState extends State<PredictionMakerField> {
   {
     return TextField(
       decoration: InputDecoration(border: InputBorder.none,),
-      controller: titleCtrl,
+      controller: controller.titleCtrl,
       textAlign: TextAlign.center,
       style: TextStyle(fontSize: 18,color: Colors.grey[200]),
     );
@@ -71,7 +69,7 @@ class _PredictionMakerFieldState extends State<PredictionMakerField> {
 
   Widget deleteBtn()
   {
-    return IconButton(onPressed: controller.onDelete, icon: Icon(Icons.delete),color: Colors.grey[200],tooltip: "Delete Item",);
+    return IconButton(onPressed: widget.onDelete, icon: Icon(Icons.delete),color: Colors.grey[200],tooltip: "Delete Item",);
   }
 
   Widget previewArea()
@@ -87,18 +85,38 @@ class PredictionMakerFieldController extends ChangeNotifier
   ///Sentence data will be read from that controller
   TextEditingController _textCtrl;
   TextEditingController get textCtrl => _textCtrl;
-  final VoidCallback? onDelete;
   final String? initialTitle;
   final List<PredictionItem> predictionList;
-  PredictionMakerFieldController({this.predictionList = const [],required TextEditingController textCtrl, this.initialTitle, this.onDelete })
+  final int id;
+  late final titleCtrl;
+  List<Map<PredictionItem,String>> itemsAndSelections = [];
+  PredictionMakerFieldController({this.predictionList = const [],required TextEditingController textCtrl, this.initialTitle,  })
   :
-  _textCtrl = textCtrl
-  ;
+  _textCtrl = textCtrl,
+  id = DateTime.now().microsecondsSinceEpoch  
+  {
+    titleCtrl = TextEditingController(text: initialTitle);
+  }
   
+  PredictionItem predictionItem()
+  {
+    return PredictionItem(suggestions: [], trigger: titleCtrl.text);
+  }
+
   ///Non reversible
   void freezeTextUpdates()
   {
     _textCtrl = TextEditingController(text: _textCtrl.text);
     notifyListeners();
   }
+
+  @override
+  bool operator ==(Object other) =>
+      other is PredictionMakerFieldController &&
+      other.runtimeType == runtimeType &&
+      other.id == id;
+
+  @override
+  int get hashCode => id;
+
 }

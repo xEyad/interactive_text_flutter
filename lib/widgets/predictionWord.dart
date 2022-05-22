@@ -1,10 +1,13 @@
 
+// ignore_for_file: curly_braces_in_flow_control_structures
+
 import 'package:flutter/material.dart';
 import 'package:interactive_text/model/predictionItem.dart';
 
 class PredictionWord extends StatefulWidget {
-  final PredictionItem predictionObj;
-  const PredictionWord(this.predictionObj ,{ Key? key }) : super(key: key);
+  final PredictionItem predictionItem;
+  final Function(String)? onSelectionChanged;
+  const PredictionWord(this.predictionItem ,{ Key? key, this.onSelectionChanged }) : super(key: key);
 
   @override
   State<PredictionWord> createState() => _PredictionWordState();
@@ -12,9 +15,18 @@ class PredictionWord extends StatefulWidget {
 
 class _PredictionWordState extends State<PredictionWord> {
   String? selection;
-  PredictionItem get predictionObj =>  widget.predictionObj;
-  String get species => predictionObj.trigger;
-  List <String> get foods => predictionObj.suggestions;
+  PredictionItem get predictionItem =>  widget.predictionItem;
+  String get species => predictionItem.trigger;
+  List <String> get foods => predictionItem.suggestions;
+
+  void onSelectionChanged(String selectedOption)
+  {
+    if(widget.onSelectionChanged!=null)
+      widget.onSelectionChanged!(selectedOption);
+     setState(() {
+        selection = selectedOption;
+      });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -22,9 +34,7 @@ class _PredictionWordState extends State<PredictionWord> {
       tooltip: "Show suggestions",
       child: content(),
       itemBuilder: (context)=>foods.map((e) => PopupMenuItem(child:Text(e),value: e,onTap: (){
-        setState(() {
-          selection = e;
-        });
+        onSelectionChanged(e);
       },)).toList(),
     );
   }
