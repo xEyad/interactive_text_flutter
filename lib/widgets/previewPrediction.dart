@@ -16,12 +16,20 @@ class _PreviewPredictionState extends State<PreviewPrediction> {
   
   List<PredictionItem> get predictionList => widget.predictionList;
 
+  void controllerListener() { 
+    setState(() {});
+  }
+
   @override
   void initState() {
     super.initState();
-    widget.sentenceCtrl.addListener(() { 
-      setState(() {});
-    });
+    widget.sentenceCtrl.addListener(controllerListener);
+  }
+
+  @override
+  void dispose() {
+    widget.sentenceCtrl.removeListener(controllerListener);
+    super.dispose();
   }
 
   ///if null is returned, then it means no match found

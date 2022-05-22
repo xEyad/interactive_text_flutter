@@ -3,12 +3,8 @@ import 'package:interactive_text/model/predictionItem.dart';
 import 'package:interactive_text/widgets/previewPrediction.dart';
 
 class PredictionMakerField extends StatefulWidget {
-  ///Sentence data will be read from that controller
-  final TextEditingController textCtrl;
-  final VoidCallback? onDelete;
-  final String? initialTitle;
-  final List<PredictionItem> predictionList;
-  PredictionMakerField({Key? key,this.predictionList = const [],required this.textCtrl, this.initialTitle, this.onDelete }) : super(key: key);
+  final PredictionMakerFieldController controller;
+  PredictionMakerField({Key? key,required this.controller }) : super(key: key);
 
   @override
   State<PredictionMakerField> createState() => _PredictionMakerFieldState();
@@ -17,11 +13,24 @@ class PredictionMakerField extends StatefulWidget {
 class _PredictionMakerFieldState extends State<PredictionMakerField> {
   final borderRadiusValue = 10.0;
   late TextEditingController titleCtrl;
+  PredictionMakerFieldController get controller => widget.controller;
+
+  void controllerListener() { 
+    setState(() {});
+  }
 
   @override
   void initState() {
     super.initState();
-    titleCtrl = TextEditingController(text: widget.initialTitle);
+    titleCtrl = TextEditingController(text: controller.initialTitle);
+    controller.addListener(controllerListener);
+  }
+
+  @override
+  void dispose() {
+    controller.removeListener(controllerListener);
+    titleCtrl.dispose();
+    super.dispose();
   }
 
 
@@ -62,12 +71,34 @@ class _PredictionMakerFieldState extends State<PredictionMakerField> {
 
   Widget deleteBtn()
   {
-    return IconButton(onPressed: widget.onDelete, icon: Icon(Icons.delete),color: Colors.grey[200],tooltip: "Delete Item",);
+    return IconButton(onPressed: controller.onDelete, icon: Icon(Icons.delete),color: Colors.grey[200],tooltip: "Delete Item",);
   }
 
   Widget previewArea()
   {
-    return PreviewPrediction(predictionList: widget.predictionList, sentenceCtrl: widget.textCtrl ,);   
+    return PreviewPrediction(predictionList: controller.predictionList, sentenceCtrl: controller.textCtrl ,);   
   }
 
+}
+
+
+class PredictionMakerFieldController extends ChangeNotifier 
+{
+  ///Sentence data will be read from that controller
+  TextEditingController _textCtrl;
+  TextEditingController get textCtrl => _textCtrl;
+  final VoidCallback? onDelete;
+  final String? initialTitle;
+  final List<PredictionItem> predictionList;
+  PredictionMakerFieldController({this.predictionList = const [],required TextEditingController textCtrl, this.initialTitle, this.onDelete })
+  :
+  _textCtrl = textCtrl
+  ;
+  
+  ///Non reversible
+  void freezeTextUpdates()
+  {
+    _textCtrl = TextEditingController(text: _textCtrl.text);
+    notifyListeners();
+  }
 }
