@@ -3,29 +3,39 @@
 
 import 'package:flutter/material.dart';
 import 'package:interactive_text/model/predictionItem.dart';
+import 'package:interactive_text/model/concreteWord.dart';
 
 class PredictionWord extends StatefulWidget {
   final PredictionItem predictionItem;
-  final Function(String)? onSelectionChanged;
-  const PredictionWord(this.predictionItem ,{ Key? key, this.onSelectionChanged }) : super(key: key);
+  final void Function(ConcreteWord)? onSelectionChanged;
+  final ConcreteWord? initialValue;
+  const PredictionWord(this.predictionItem ,{ Key? key, this.onSelectionChanged, this.initialValue }) : super(key: key);
 
   @override
   State<PredictionWord> createState() => _PredictionWordState();
 }
 
 class _PredictionWordState extends State<PredictionWord> {
+  ConcreteWord get word => ConcreteWord(predictionItem,selection);
   String? selection;
   PredictionItem get predictionItem =>  widget.predictionItem;
   String get species => predictionItem.trigger;
   List <String> get foods => predictionItem.suggestions;
 
+  @override
+  void initState() {
+    super.initState();
+    if(widget.initialValue!=null )
+      selection = widget.initialValue?.selection;
+  }
+
   void onSelectionChanged(String selectedOption)
   {
     if(widget.onSelectionChanged!=null)
-      widget.onSelectionChanged!(selectedOption);
-     setState(() {
-        selection = selectedOption;
-      });
+      widget.onSelectionChanged!(word);
+    setState(() {
+      selection = selectedOption;
+    });
   }
 
   @override

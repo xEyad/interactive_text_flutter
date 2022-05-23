@@ -2,15 +2,16 @@
 
 import 'package:flutter/material.dart';
 import 'package:interactive_text/model/predictionItem.dart';
+import 'package:interactive_text/model/concreteWord.dart';
 import 'package:interactive_text/widgets/predictionWord.dart';
 
 class PreviewPrediction extends StatefulWidget {
   final List<PredictionItem> predictionList;
   ///this function runs whenever user selects option from prediction item
-  final void Function(PredictionItem,String)? onItemSelectionUpdated;
+  final void Function(List<ConcreteWord> word)? onSentenceUpdated;
   ///Sentence data will be read from that controller
   final TextEditingController sentenceCtrl;
-  const PreviewPrediction({Key? key, required this.predictionList, required this.sentenceCtrl, this.onItemSelectionUpdated}) : super(key: key);
+  const PreviewPrediction({Key? key, required this.predictionList, required this.sentenceCtrl, this.onSentenceUpdated}) : super(key: key);
 
   @override
   State<PreviewPrediction> createState() => _PreviewPredictionState();
@@ -19,25 +20,64 @@ class PreviewPrediction extends StatefulWidget {
 class _PreviewPredictionState extends State<PreviewPrediction> {
   
   List<PredictionItem> get predictionList => widget.predictionList;
-  //TODO: maintain this list and update it whenever item changes or gets deleted!
-  //TODO: maintain selection state
-  List<Map<PredictionItem,String>> itemsAndSelections = [];
+  List<ConcreteWord> sentence = [];
+  String previousText = "";
 
-  void controllerListener() { 
-    setState(() {});
+
+
+  void onWordUpdated(ConcreteWord newWord,int indexInSentence)
+  {
+    sentence[indexInSentence] = newWord;
+    onSentenceUpdated();
   }
 
-  void onItemSelectionUpdated(PredictionItem item,String selection)
+  void onSentenceUpdated()
   {
-    if(widget.onItemSelectionUpdated==null)
+    setState(() {});
+    if(widget.onSentenceUpdated==null)
       return;
-    widget.onItemSelectionUpdated!(item,selection);
+    widget.onSentenceUpdated!(sentence);
+
   }
 
   @override
   void initState() {
     super.initState();
     widget.sentenceCtrl.addListener(controllerListener);
+  }
+
+  void controllerListener() { 
+    //make sentence
+
+    final currentText = widget.sentenceCtrl.text;
+    //check if the user is typing or removing
+    final bool hasUserTypedNewWord = previousText.split(' ').length < currentText.split(' ').length;
+    final bool hasUserRemovedWord = previousText.split(' ').length > currentText.split(' ').length;
+    if(hasUserTypedNewWord)
+    {
+      final newWord = currentText.split(' ').last;
+      final predictionObj =  getPredictionWordObj(newWord);
+      if(predictionObj!=null)
+      {
+        sentence.add(ConcreteWord(predictionObj)); 
+        onSentenceUpdated();
+      }
+    }
+    else if(hasUserRemovedWord)
+    {
+      final removedWord = previousText.split(' ').last;
+      final predictionObj =  getPredictionWordObj(removedWord);
+      if(predictionObj!=null)
+      {
+        sentence.remove(sentence.last); 
+        onSentenceUpdated();
+      }
+    }
+
+    //update prev text
+    previousText = widget.sentenceCtrl.text;
+    setState(() {});
+    
   }
 
   @override
@@ -83,19 +123,27 @@ class _PreviewPredictionState extends State<PreviewPrediction> {
 
   List<Widget> get widgetList
   {
+    var wordsFound = 0;
     return widget.sentenceCtrl.text.split(' ').map(
       (e)
       {
         final predictionObj =  getPredictionWordObj(e);
-        return predictionObj==null ? Text(e+' ') : predictionWord(predictionObj);
+        if(predictionObj==null)
+          return Text(e+' ');
+        else
+        {
+          wordsFound++;
+          //TODO: fix error here! run on android not web
+          return concreteWord(sentence[wordsFound-1],wordsFound-1);
+        }
       }
     ).toList();
   }
 
-  Widget predictionWord(PredictionItem? predictionObj)
+  Widget concreteWord(ConcreteWord word,int indexInSentence)
   {
     return Container(
-      child: PredictionWord(predictionObj!,onSelectionChanged: (String selection)=>onItemSelectionUpdated(predictionObj,selection),),
+      child: PredictionWord(word.predictionItem,initialValue: word,onSelectionChanged: (newWord)=>onWordUpdated(newWord, indexInSentence),),
       margin: EdgeInsets.only(right: 10),);
   }
   
