@@ -46,10 +46,28 @@ class _PreviewPredictionState extends State<PreviewPrediction> {
     if(widget.initialSentence!=null && widget.initialSentence!.isNotEmpty)
       sentence = widget.initialSentence!;
     else
-      generateSentence();
+      initSentence();
     widget.sentenceCtrl.addListener(controllerListener);
   }
+  
+  void initSentence()
+  {
+    final currentText = widget.sentenceCtrl.text.trim().split(' ');
+    bool isUpdateHappen = false;
+    for (var word in currentText) {
+      final predictionObj =  getPredictionWordObj(word);
+      if(predictionObj!=null)
+      {
+        sentence.add(ConcreteWord(predictionObj)); 
+        isUpdateHappen = true;
+       
+      }
+    }
 
+    if(isUpdateHappen)
+      onSentenceUpdated();
+  }
+  
   void generateSentence()
   {
     final currentText = widget.sentenceCtrl.text;
