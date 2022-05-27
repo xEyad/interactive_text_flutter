@@ -11,7 +11,8 @@ class PreviewPrediction extends StatefulWidget {
   final void Function(List<ConcreteWord> word)? onSentenceUpdated;
   ///Sentence data will be read from that controller
   final TextEditingController sentenceCtrl;
-  const PreviewPrediction({Key? key, required this.predictionList, required this.sentenceCtrl, this.onSentenceUpdated}) : super(key: key);
+  final List<ConcreteWord>? initialSentence;
+  const PreviewPrediction({Key? key, required this.predictionList, required this.sentenceCtrl, this.onSentenceUpdated, this.initialSentence}) : super(key: key);
 
   @override
   State<PreviewPrediction> createState() => _PreviewPredictionState();
@@ -42,40 +43,44 @@ class _PreviewPredictionState extends State<PreviewPrediction> {
   @override
   void initState() {
     super.initState();
-    generateSentence();
+    if(widget.initialSentence!=null && widget.initialSentence!.isNotEmpty)
+      sentence = widget.initialSentence!;
+    else
+      generateSentence();
     widget.sentenceCtrl.addListener(controllerListener);
   }
 
   void generateSentence()
   {
-      final currentText = widget.sentenceCtrl.text.trim();
-      //check if the user is typing or removing
-      final bool hasUserTypedNewWord = previousText.split(' ').length < currentText.split(' ').length;
-      final bool hasUserRemovedWord = previousText.split(' ').length > currentText.split(' ').length;
-      final bool isLastWordATrigger = getPredictionWordObj(currentText.split(' ').last) !=null;
-      if(hasUserTypedNewWord || isLastWordATrigger)
+    final currentText = widget.sentenceCtrl.text;
+    //check if the user is typing or removing
+    final bool hasUserTypedNewWord = previousText.trim().split(' ').length < currentText.trim().split(' ').length;
+    final bool hasUserRemovedWord = previousText.trim().split(' ').length > currentText.trim().split(' ').length;
+    final bool hasUserTypedNewChar = currentText.length > previousText.length;
+    final bool isLastWordATrigger = getPredictionWordObj(currentText.trim().split(' ').last) !=null;
+    if(hasUserTypedNewWord || (isLastWordATrigger && hasUserTypedNewChar))
+    {
+      final newWord = currentText.split(' ').last;
+      final predictionObj =  getPredictionWordObj(newWord);
+      if(predictionObj!=null)
       {
-        final newWord = currentText.split(' ').last;
-        final predictionObj =  getPredictionWordObj(newWord);
-        if(predictionObj!=null)
-        {
-          sentence.add(ConcreteWord(predictionObj)); 
-          onSentenceUpdated();
-        }
+        sentence.add(ConcreteWord(predictionObj)); 
+        onSentenceUpdated();
       }
-      else if(hasUserRemovedWord)
+    }
+    else if(hasUserRemovedWord)
+    {
+      final removedWord = previousText.split(' ').last;
+      final predictionObj =  getPredictionWordObj(removedWord);
+      if(predictionObj!=null)
       {
-        final removedWord = previousText.split(' ').last;
-        final predictionObj =  getPredictionWordObj(removedWord);
-        if(predictionObj!=null)
-        {
-          sentence.remove(sentence.last); 
-          onSentenceUpdated();
-        }
+        sentence.remove(sentence.last); 
+        onSentenceUpdated();
       }
+    }
 
-      //update prev text
-      previousText = widget.sentenceCtrl.text.trim();
+    //update prev text
+    previousText = widget.sentenceCtrl.text;
   }
   
   void controllerListener() { 
@@ -146,7 +151,11 @@ class _PreviewPredictionState extends State<PreviewPrediction> {
   Widget concreteWord(ConcreteWord word,int indexInSentence)
   {
     return Container(
-      child: PredictionWord(word.predictionItem,initialValue: word,onSelectionChanged: (newWord)=>onWordUpdated(newWord, indexInSentence),),
+      child: PredictionWord(
+        word.predictionItem,
+        initialValue: word,
+        onSelectionChanged: (newWord)=>onWordUpdated(newWord, indexInSentence),
+      ),
       margin: EdgeInsets.only(right: 10),);
   }
   
