@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:interactive_text/model/concreteWord.dart';
 import 'package:interactive_text/model/predictionItem.dart';
 import 'package:interactive_text/widgets/previewPrediction.dart';
 
@@ -74,8 +75,12 @@ class _PredictionMakerFieldState extends State<PredictionMakerField> {
 
   Widget previewArea()
   {
-    //TODO: handle updated lists
-    return PreviewPrediction(predictionList: controller.predictionList, sentenceCtrl: controller.textCtrl ,);   
+    return PreviewPrediction(
+      predictionList: controller.predictionList, 
+      sentenceCtrl: controller.textCtrl,
+      onSentenceUpdated: (sentence)=>controller._updateSentence(sentence),
+      initialSentence: controller.sentence,
+    );   
   }
 
 }
@@ -89,8 +94,9 @@ class PredictionMakerFieldController extends ChangeNotifier
   final String? initialTitle;
   final List<PredictionItem> predictionList;
   final int id;
-  late final titleCtrl;
-  List<Map<PredictionItem,String>> itemsAndSelections = [];
+  late final TextEditingController titleCtrl;
+  List<ConcreteWord> get sentence => _sentence;
+  List<ConcreteWord> _sentence = [];
   PredictionMakerFieldController({this.predictionList = const [],required TextEditingController textCtrl, this.initialTitle,  })
   :
   _textCtrl = textCtrl,
@@ -104,6 +110,10 @@ class PredictionMakerFieldController extends ChangeNotifier
     return PredictionItem(suggestions: [], trigger: titleCtrl.text);
   }
 
+  void _updateSentence(List<ConcreteWord> sentence)
+  {
+    _sentence = sentence;
+  }
   ///Non reversible
   void freezeTextUpdates()
   {
