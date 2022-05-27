@@ -31,10 +31,10 @@ class _PredictionWordState extends State<PredictionWord> {
 
   void onSelectionChanged(String selectedOption)
   {
+    selection = selectedOption;
     if(widget.onSelectionChanged!=null)
       widget.onSelectionChanged!(word);
     setState(() {
-      selection = selectedOption;
     });
   }
 
