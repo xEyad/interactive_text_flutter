@@ -48,7 +48,7 @@ class _PreviewPredictionState extends State<PreviewPrediction> {
 
   void generateSentence()
   {
-      final currentText = widget.sentenceCtrl.text;
+      final currentText = widget.sentenceCtrl.text.trim();
       //check if the user is typing or removing
       final bool hasUserTypedNewWord = previousText.split(' ').length < currentText.split(' ').length;
       final bool hasUserRemovedWord = previousText.split(' ').length > currentText.split(' ').length;
@@ -75,7 +75,7 @@ class _PreviewPredictionState extends State<PreviewPrediction> {
       }
 
       //update prev text
-      previousText = widget.sentenceCtrl.text;
+      previousText = widget.sentenceCtrl.text.trim();
   }
   
   void controllerListener() { 
