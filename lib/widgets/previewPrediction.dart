@@ -75,6 +75,7 @@ class _PreviewPredictionState extends State<PreviewPrediction> {
     final bool hasUserTypedNewWord = previousText.trim().split(' ').length < currentText.trim().split(' ').length;
     final bool hasUserRemovedWord = previousText.trim().split(' ').length > currentText.trim().split(' ').length;
     final bool hasUserTypedNewChar = currentText.length > previousText.length;
+    final bool hasUserRemovedChar = currentText.length < previousText.length;
     final bool isLastWordATrigger = getPredictionWordObj(currentText.trim().split(' ').last) !=null;
     if(hasUserTypedNewWord || (isLastWordATrigger && hasUserTypedNewChar))
     {
@@ -86,7 +87,7 @@ class _PreviewPredictionState extends State<PreviewPrediction> {
         onSentenceUpdated();
       }
     }
-    else if(hasUserRemovedWord)
+    else if(hasUserRemovedWord || hasUserRemovedChar)
     {
       final removedWord = previousText.split(' ').last;
       final predictionObj =  getPredictionWordObj(removedWord);

@@ -32,7 +32,8 @@ class _HomeScreenState extends State<HomeScreen> {
   ].map((e) => PredictionItem.fromJson(e)).toList();
   final scrollCtrl = ScrollController();
   int nSentencesAdded = 0;
-
+  PredictionMakerFieldController? activeSentenceCtrl;
+  
   void onAddSentence(String initialTitle)
   {    
     if(sentencesControllers.isNotEmpty)
@@ -43,6 +44,7 @@ class _HomeScreenState extends State<HomeScreen> {
     sentencesControllers.add(
       PredictionMakerFieldController(textCtrl: textCtrl,predictionList: predictionList,initialTitle: initialTitle,)
     );     
+    setActiveSentenceCtrl(sentencesControllers.last);
     nSentencesAdded++;
 
     setState(() {  
@@ -53,6 +55,16 @@ class _HomeScreenState extends State<HomeScreen> {
       Duration(milliseconds: 100),
       () => scrollCtrl.animateTo(scrollCtrl.position.maxScrollExtent, duration: Duration(milliseconds: 100), curve: Curves.linear),
       );
+  }
+
+  void setActiveSentenceCtrl(PredictionMakerFieldController ctrl)
+  {
+    activeSentenceCtrl?.freezeTextUpdates();
+    textCtrl.text = ctrl.textCtrl.text;
+    ctrl.updateTextCtrl(textCtrl);
+    setState(() {
+      activeSentenceCtrl = ctrl;
+    });
   }
 
   Future<void> openGithubSource() async{
@@ -123,17 +135,26 @@ click on the words, to open and pick a suggestion. """);
       controller: scrollCtrl,
       // reverse: true,
       children: sentencesControllers.map(
-        (e) => Container(
-          key: UniqueKey(),
-          margin: EdgeInsets.only(bottom: 10),
-          child: PredictionMakerField(
-            controller:e,
-            onDelete: (){
-              setState(() {
-                sentencesControllers.remove(e);
-              });
-            }))
+        (e) => sentence(e)
       ).toList(),      
+    );
+  }
+
+  Widget sentence(PredictionMakerFieldController sentenceCtrl)
+  {
+    return GestureDetector(
+      onTap: (){setActiveSentenceCtrl(sentenceCtrl);},
+      child: Container(
+            key: UniqueKey(),
+            margin: EdgeInsets.only(bottom: 10),
+            child: PredictionMakerField(
+              highlightColor: activeSentenceCtrl==sentenceCtrl?Color(0xFF064789):null,
+              controller:sentenceCtrl,
+              onDelete: (){
+                setState(() {
+                  sentencesControllers.remove(sentenceCtrl);
+                });
+              })),
     );
   }
 }

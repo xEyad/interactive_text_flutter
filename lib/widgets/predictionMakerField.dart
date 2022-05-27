@@ -6,7 +6,8 @@ import 'package:interactive_text/widgets/previewPrediction.dart';
 class PredictionMakerField extends StatefulWidget {
   final VoidCallback? onDelete;
   final PredictionMakerFieldController controller;
-  PredictionMakerField({Key? key,required this.controller,this.onDelete }) : super(key: key);
+  final Color? highlightColor;
+  PredictionMakerField({Key? key,required this.controller,this.onDelete, this.highlightColor }) : super(key: key);
 
   @override
   State<PredictionMakerField> createState() => _PredictionMakerFieldState();
@@ -16,31 +17,28 @@ class _PredictionMakerFieldState extends State<PredictionMakerField> {
   final borderRadiusValue = 10.0;
   PredictionMakerFieldController get controller => widget.controller;
 
-  void controllerListener() { 
-    // setState(() {});
-  }
 
   @override
   void initState() {
     super.initState();
-    controller.addListener(controllerListener);
   }
 
   @override
   void dispose() {
-    controller.removeListener(controllerListener);
     super.dispose();
   }
 
 
   @override
   Widget build(BuildContext context) {
-    return Container(child: Column(children: [
-      titleBar(),
-      previewArea()
-    ]),
+    return Container(
+      child: Column(
+        children: [
+          titleBar(),
+          previewArea()
+        ]),
     width: double.infinity,
-    decoration: BoxDecoration(borderRadius: BorderRadius.circular(borderRadiusValue),border: Border.all()),);
+    decoration: BoxDecoration(borderRadius: BorderRadius.circular(borderRadiusValue),border: Border.all(color: widget.highlightColor??Colors.black)),);
   }
 
   Widget titleBar()
@@ -49,7 +47,7 @@ class _PredictionMakerFieldState extends State<PredictionMakerField> {
       padding: EdgeInsets.all(5),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.only(topLeft: Radius.circular(borderRadiusValue),topRight: Radius.circular(borderRadiusValue)),
-        color: Color(0xFF717C89)
+        color: widget.highlightColor??Color(0xFF717C89)
       ),
       child: Row(children: [
         Expanded(child: Center(child: titleField()),),
@@ -114,10 +112,16 @@ class PredictionMakerFieldController extends ChangeNotifier
   {
     _sentence = sentence;
   }
-  ///Non reversible
+
   void freezeTextUpdates()
   {
     _textCtrl = TextEditingController(text: _textCtrl.text);
+    notifyListeners();
+  }
+
+  void updateTextCtrl(TextEditingController newCtrl)
+  {
+    _textCtrl = newCtrl;
     notifyListeners();
   }
 
