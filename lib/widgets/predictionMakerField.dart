@@ -16,7 +16,7 @@ class _PredictionMakerFieldState extends State<PredictionMakerField> {
   PredictionMakerFieldController get controller => widget.controller;
 
   void controllerListener() { 
-    setState(() {});
+    // setState(() {});
   }
 
   @override
@@ -74,6 +74,7 @@ class _PredictionMakerFieldState extends State<PredictionMakerField> {
 
   Widget previewArea()
   {
+    //TODO: handle updated lists
     return PreviewPrediction(predictionList: controller.predictionList, sentenceCtrl: controller.textCtrl ,);   
   }
 

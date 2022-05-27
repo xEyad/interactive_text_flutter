@@ -106,7 +106,11 @@ click on the words, to open and pick a suggestion. """);
     return Row(
       children: [
         Spacer(),
-        ElevatedButton(onPressed: ()=>onAddSentence("Variable ${sentencesControllers.length+1}"), child: Text('Add sentence +'),style: ButtonStyle(padding: MaterialStateProperty.all(EdgeInsets.all(20))),),
+        ElevatedButton(
+          onPressed: ()=>onAddSentence("Variable ${sentencesControllers.length+1}"), 
+          child: Text('Add sentence +'),
+          style: ButtonStyle(padding: MaterialStateProperty.all(EdgeInsets.all(20))),
+          ),
       ],
     );
   }

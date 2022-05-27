@@ -37,47 +37,50 @@ class _PreviewPredictionState extends State<PreviewPrediction> {
     if(widget.onSentenceUpdated==null)
       return;
     widget.onSentenceUpdated!(sentence);
-
   }
 
   @override
   void initState() {
     super.initState();
+    generateSentence();
     widget.sentenceCtrl.addListener(controllerListener);
   }
 
+  void generateSentence()
+  {
+      final currentText = widget.sentenceCtrl.text;
+      //check if the user is typing or removing
+      final bool hasUserTypedNewWord = previousText.split(' ').length < currentText.split(' ').length;
+      final bool hasUserRemovedWord = previousText.split(' ').length > currentText.split(' ').length;
+      final bool isLastWordATrigger = getPredictionWordObj(currentText.split(' ').last) !=null;
+      if(hasUserTypedNewWord || isLastWordATrigger)
+      {
+        final newWord = currentText.split(' ').last;
+        final predictionObj =  getPredictionWordObj(newWord);
+        if(predictionObj!=null)
+        {
+          sentence.add(ConcreteWord(predictionObj)); 
+          onSentenceUpdated();
+        }
+      }
+      else if(hasUserRemovedWord)
+      {
+        final removedWord = previousText.split(' ').last;
+        final predictionObj =  getPredictionWordObj(removedWord);
+        if(predictionObj!=null)
+        {
+          sentence.remove(sentence.last); 
+          onSentenceUpdated();
+        }
+      }
+
+      //update prev text
+      previousText = widget.sentenceCtrl.text;
+  }
+  
   void controllerListener() { 
-    //make sentence
-
-    final currentText = widget.sentenceCtrl.text;
-    //check if the user is typing or removing
-    final bool hasUserTypedNewWord = previousText.split(' ').length < currentText.split(' ').length;
-    final bool hasUserRemovedWord = previousText.split(' ').length > currentText.split(' ').length;
-    if(hasUserTypedNewWord)
-    {
-      final newWord = currentText.split(' ').last;
-      final predictionObj =  getPredictionWordObj(newWord);
-      if(predictionObj!=null)
-      {
-        sentence.add(ConcreteWord(predictionObj)); 
-        onSentenceUpdated();
-      }
-    }
-    else if(hasUserRemovedWord)
-    {
-      final removedWord = previousText.split(' ').last;
-      final predictionObj =  getPredictionWordObj(removedWord);
-      if(predictionObj!=null)
-      {
-        sentence.remove(sentence.last); 
-        onSentenceUpdated();
-      }
-    }
-
-    //update prev text
-    previousText = widget.sentenceCtrl.text;
-    setState(() {});
-    
+    generateSentence();
+    setState(() {});    
   }
 
   @override
