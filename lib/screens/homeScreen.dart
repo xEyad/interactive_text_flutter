@@ -31,7 +31,8 @@ class _HomeScreenState extends State<HomeScreen> {
   }
   ].map((e) => PredictionItem.fromJson(e)).toList();
   final scrollCtrl = ScrollController();
-  
+  int nSentencesAdded = 0;
+
   void onAddSentence(String initialTitle)
   {    
     if(sentencesControllers.isNotEmpty)
@@ -42,6 +43,7 @@ class _HomeScreenState extends State<HomeScreen> {
     sentencesControllers.add(
       PredictionMakerFieldController(textCtrl: textCtrl,predictionList: predictionList,initialTitle: initialTitle,)
     );     
+    nSentencesAdded++;
 
     setState(() {  
       if(sentencesControllers.length > 1)
@@ -107,7 +109,7 @@ click on the words, to open and pick a suggestion. """);
       children: [
         Spacer(),
         ElevatedButton(
-          onPressed: ()=>onAddSentence("Variable ${sentencesControllers.length+1}"), 
+          onPressed: ()=>onAddSentence("Variable $nSentencesAdded"), 
           child: Text('Add sentence +'),
           style: ButtonStyle(padding: MaterialStateProperty.all(EdgeInsets.all(20))),
           ),
@@ -119,7 +121,7 @@ click on the words, to open and pick a suggestion. """);
   {
     return ListView(
       controller: scrollCtrl,
-      reverse: true,
+      // reverse: true,
       children: sentencesControllers.map(
         (e) => Container(
           key: UniqueKey(),
