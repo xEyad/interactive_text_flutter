@@ -1,7 +1,10 @@
+// ignore_for_file: avoid_print
+library prediction_maker_field;
 import 'package:flutter/material.dart';
 import 'package:interactive_text/model/concreteWord.dart';
 import 'package:interactive_text/model/predictionItem.dart';
 import 'package:interactive_text/widgets/previewPrediction.dart';
+part 'predictionMakerFieldCtrl.dart';
 
 class PredictionMakerField extends StatefulWidget {
   final VoidCallback? onDelete;
@@ -17,14 +20,20 @@ class _PredictionMakerFieldState extends State<PredictionMakerField> {
   final borderRadiusValue = 10.0;
   PredictionMakerFieldController get controller => widget.controller;
 
+  void controllerListener()
+  {
+    setState(() {});
+  }
 
   @override
   void initState() {
     super.initState();
+    // controller.addListener(controllerListener);
   }
 
   @override
   void dispose() {
+    // controller.removeListener(controllerListener);
     super.dispose();
   }
 
@@ -74,64 +83,10 @@ class _PredictionMakerFieldState extends State<PredictionMakerField> {
   Widget previewArea()
   {
     return PreviewPrediction(
-      predictionList: controller.predictionList, 
-      sentenceCtrl: controller.textCtrl,
-      onSentenceUpdated: (sentence)=>controller._updateSentence(sentence),
-      initialSentence: controller.sentence,
+      key: UniqueKey(),
+      controller: controller,
     );   
   }
 
 }
 
-
-class PredictionMakerFieldController extends ChangeNotifier 
-{
-  ///Sentence data will be read from that controller
-  TextEditingController _textCtrl;
-  TextEditingController get textCtrl => _textCtrl;
-  final String? initialTitle;
-  final List<PredictionItem> predictionList;
-  final int id;
-  late final TextEditingController titleCtrl;
-  List<ConcreteWord> get sentence => _sentence;
-  List<ConcreteWord> _sentence = [];
-  PredictionMakerFieldController({this.predictionList = const [],required TextEditingController textCtrl, this.initialTitle,  })
-  :
-  _textCtrl = textCtrl,
-  id = DateTime.now().microsecondsSinceEpoch  
-  {
-    titleCtrl = TextEditingController(text: initialTitle);
-  }
-  
-  PredictionItem predictionItem()
-  {
-    return PredictionItem(suggestions: [], trigger: titleCtrl.text);
-  }
-
-  void _updateSentence(List<ConcreteWord> sentence)
-  {
-    _sentence = sentence;
-  }
-
-  void freezeTextUpdates()
-  {
-    _textCtrl = TextEditingController(text: _textCtrl.text);
-    notifyListeners();
-  }
-
-  void updateTextCtrl(TextEditingController newCtrl)
-  {
-    _textCtrl = newCtrl;
-    notifyListeners();
-  }
-
-  @override
-  bool operator ==(Object other) =>
-      other is PredictionMakerFieldController &&
-      other.runtimeType == runtimeType &&
-      other.id == id;
-
-  @override
-  int get hashCode => id;
-
-}

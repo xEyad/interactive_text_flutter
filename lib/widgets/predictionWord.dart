@@ -20,7 +20,7 @@ class _PredictionWordState extends State<PredictionWord> {
   String? selection;
   PredictionItem get predictionItem =>  widget.predictionItem;
   String get species => predictionItem.trigger;
-  List <String> get foods => predictionItem.suggestions;
+  List <String> get predictionItems => predictionItem.suggestions;
 
   @override
   void initState() {
@@ -43,7 +43,7 @@ class _PredictionWordState extends State<PredictionWord> {
     return PopupMenuButton(
       tooltip: "Show suggestions",
       child: content(),
-      itemBuilder: (context)=>foods.map((e) => PopupMenuItem(child:Text(e),value: e,onTap: (){
+      itemBuilder: (context)=>predictionItems.map((e) => PopupMenuItem(child:Text(e),value: e,onTap: (){
         onSelectionChanged(e);
       },)).toList(),
     );

@@ -2,7 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:interactive_text/model/predictionItem.dart';
-import 'package:interactive_text/widgets/predictionMakerField.dart';
+import 'package:interactive_text/widgets/predictionMakerField/predictionMakerField.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -38,30 +38,42 @@ class _HomeScreenState extends State<HomeScreen> {
   {    
     if(sentencesControllers.isNotEmpty)
     {      
-      sentencesControllers.last.freezeTextUpdates();
+      sentencesControllers.last.toggleTextUpdates();
     }
 
     sentencesControllers.add(
-      PredictionMakerFieldController(textCtrl: textCtrl,predictionList: predictionList,initialTitle: initialTitle,)
+      PredictionMakerFieldController(predictionList: predictionList,initialTitle: initialTitle,)
     );     
     setActiveSentenceCtrl(sentencesControllers.last);
     nSentencesAdded++;
 
-    setState(() {  
-      if(sentencesControllers.length > 1)
-        textCtrl.clear();      
-    });
+
     Future.delayed(
       Duration(milliseconds: 100),
       () => scrollCtrl.animateTo(scrollCtrl.position.maxScrollExtent, duration: Duration(milliseconds: 100), curve: Curves.linear),
       );
   }
 
+  void onDeleteSentenceCtrl(PredictionMakerFieldController ctrl)
+  {
+    if(ctrl == activeSentenceCtrl)
+      activeSentenceCtrl = null;
+
+    print('Removed ${ctrl.titleCtrl.text}');
+    sentencesControllers.remove(ctrl);
+
+    if(activeSentenceCtrl == null && sentencesControllers.isNotEmpty)
+      activeSentenceCtrl = sentencesControllers.last;
+
+    if(activeSentenceCtrl==null && sentencesControllers.isEmpty)
+      textCtrl.clear();
+
+    setState(() {});
+  }
+
   void setActiveSentenceCtrl(PredictionMakerFieldController ctrl)
   {
-    activeSentenceCtrl?.freezeTextUpdates();
-    textCtrl.text = ctrl.textCtrl.text;
-    ctrl.updateTextCtrl(textCtrl);
+    activeSentenceCtrl?.toggleTextUpdates();
     setState(() {
       activeSentenceCtrl = ctrl;
     });
@@ -109,10 +121,19 @@ click on the words, to open and pick a suggestion. """);
 
   Widget textInput()
   {
-    return TextField(        
-      decoration: InputDecoration(border: OutlineInputBorder(borderRadius: BorderRadius.circular(10))),
+    String label = "";
+    if(activeSentenceCtrl != null)
+    {
+      label = "Editing ${activeSentenceCtrl!.titleCtrl.text}";
+    }
+    return TextField( 
+      readOnly: activeSentenceCtrl==null,
+      decoration: InputDecoration(
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+        labelText: label
+        ),
       maxLines: 5,
-      controller: textCtrl,
+      controller: activeSentenceCtrl!=null? activeSentenceCtrl!.textCtrl : textCtrl,
     );
   }
 
@@ -150,11 +171,7 @@ click on the words, to open and pick a suggestion. """);
             child: PredictionMakerField(
               highlightColor: activeSentenceCtrl==sentenceCtrl?Color(0xFF064789):null,
               controller:sentenceCtrl,
-              onDelete: (){
-                setState(() {
-                  sentencesControllers.remove(sentenceCtrl);
-                });
-              })),
+              onDelete: ()=>onDeleteSentenceCtrl(sentenceCtrl))),
     );
   }
 }

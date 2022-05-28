@@ -3,16 +3,13 @@
 import 'package:flutter/material.dart';
 import 'package:interactive_text/model/predictionItem.dart';
 import 'package:interactive_text/model/concreteWord.dart';
+import 'package:interactive_text/widgets/predictionMakerField/predictionMakerField.dart';
 import 'package:interactive_text/widgets/predictionWord.dart';
 
 class PreviewPrediction extends StatefulWidget {
-  final List<PredictionItem> predictionList;
   ///this function runs whenever user selects option from prediction item
-  final void Function(List<ConcreteWord> word)? onSentenceUpdated;
-  ///Sentence data will be read from that controller
-  final TextEditingController sentenceCtrl;
-  final List<ConcreteWord>? initialSentence;
-  const PreviewPrediction({Key? key, required this.predictionList, required this.sentenceCtrl, this.onSentenceUpdated, this.initialSentence}) : super(key: key);
+  final PredictionMakerFieldController controller;
+  const PreviewPrediction({Key? key, required this.controller}) : super(key: key);
 
   @override
   State<PreviewPrediction> createState() => _PreviewPredictionState();
@@ -20,96 +17,27 @@ class PreviewPrediction extends StatefulWidget {
 
 class _PreviewPredictionState extends State<PreviewPrediction> {
   
-  List<PredictionItem> get predictionList => widget.predictionList;
-  List<ConcreteWord> sentence = [];
-  String previousText = "";
-
-
+  List<PredictionItem> get predictionList => widget.controller.predictionList;
 
   void onWordUpdated(ConcreteWord newWord,int indexInSentence)
   {
-    sentence[indexInSentence] = newWord;
-    onSentenceUpdated();
-  }
-
-  void onSentenceUpdated()
-  {
-    setState(() {});
-    if(widget.onSentenceUpdated==null)
-      return;
-    widget.onSentenceUpdated!(sentence);
+    widget.controller.partiallyUpdateSentence(ConcreteTextItem(newWord),indexInSentence);
   }
 
   @override
   void initState() {
     super.initState();
-    if(widget.initialSentence!=null && widget.initialSentence!.isNotEmpty)
-      sentence = widget.initialSentence!;
-    else
-      initSentence();
-    widget.sentenceCtrl.addListener(controllerListener);
+    widget.controller.addListener(controllerListener);
   }
   
-  void initSentence()
-  {
-    final currentText = widget.sentenceCtrl.text.trim().split(' ');
-    bool isUpdateHappen = false;
-    for (var word in currentText) {
-      final predictionObj =  getPredictionWordObj(word);
-      if(predictionObj!=null)
-      {
-        sentence.add(ConcreteWord(predictionObj)); 
-        isUpdateHappen = true;
-       
-      }
-    }
-
-    if(isUpdateHappen)
-      onSentenceUpdated();
-  }
-  
-  void generateSentence()
-  {
-    final currentText = widget.sentenceCtrl.text;
-    //check if the user is typing or removing
-    final bool hasUserTypedNewWord = previousText.trim().split(' ').length < currentText.trim().split(' ').length;
-    final bool hasUserRemovedWord = previousText.trim().split(' ').length > currentText.trim().split(' ').length;
-    final bool hasUserTypedNewChar = currentText.length > previousText.length;
-    final bool hasUserRemovedChar = currentText.length < previousText.length;
-    final bool isLastWordATrigger = getPredictionWordObj(currentText.trim().split(' ').last) !=null;
-    if(hasUserTypedNewWord || (isLastWordATrigger && hasUserTypedNewChar))
-    {
-      final newWord = currentText.split(' ').last;
-      final predictionObj =  getPredictionWordObj(newWord);
-      if(predictionObj!=null)
-      {
-        sentence.add(ConcreteWord(predictionObj)); 
-        onSentenceUpdated();
-      }
-    }
-    else if(hasUserRemovedWord || hasUserRemovedChar)
-    {
-      final removedWord = previousText.split(' ').last;
-      final predictionObj =  getPredictionWordObj(removedWord);
-      if(predictionObj!=null)
-      {
-        sentence.remove(sentence.last); 
-        onSentenceUpdated();
-      }
-    }
-
-    //update prev text
-    previousText = widget.sentenceCtrl.text;
-  }
   
   void controllerListener() { 
-    generateSentence();
     setState(() {});    
   }
 
   @override
   void dispose() {
-    widget.sentenceCtrl.removeListener(controllerListener);
+    widget.controller.removeListener(controllerListener);
     super.dispose();
   }
 
@@ -150,8 +78,17 @@ class _PreviewPredictionState extends State<PreviewPrediction> {
 
   List<Widget> get widgetList
   {
+    // List<Widget> widgets = [];
+    // for (var i = 0; i < widget.controller.sentence.length; i++) {
+    //   final w = widget.controller.sentence[i];
+    //   if(w is NormalTextItem)
+    //       widgets.add(Text(w.text+' '));
+    //   else if(w is ConcreteTextItem)
+    //     widgets.add(concreteWord(w.word,i));
+    // }
+    // return widgets;
     var wordsFound = 0;
-    return widget.sentenceCtrl.text.split(' ').map(
+    return widget.controller.textCtrl.text.split(' ').map(
       (e)
       {
         final predictionObj =  getPredictionWordObj(e);
@@ -160,8 +97,8 @@ class _PreviewPredictionState extends State<PreviewPrediction> {
         else
         {
           wordsFound++;
-          //TODO: fix error here! run on android not web
-          return concreteWord(sentence[wordsFound-1],wordsFound-1);
+          //TODO: fix reading order
+          return concreteWord((widget.controller.sentence[wordsFound-1] as ConcreteTextItem).word,wordsFound-1);
         }
       }
     ).toList();
