@@ -21,7 +21,7 @@ class _PreviewPredictionState extends State<PreviewPrediction> {
 
   void onWordUpdated(ConcreteWord newWord,int indexInSentence)
   {
-    widget.controller.partiallyUpdateSentence(ConcreteTextItem(newWord),indexInSentence);
+    widget.controller.partiallyUpdateSentence(ConcreteTextItem(newWord),indexInSentence);    
   }
 
   @override
@@ -78,15 +78,6 @@ class _PreviewPredictionState extends State<PreviewPrediction> {
 
   List<Widget> get widgetList
   {
-    // List<Widget> widgets = [];
-    // for (var i = 0; i < widget.controller.sentence.length; i++) {
-    //   final w = widget.controller.sentence[i];
-    //   if(w is NormalTextItem)
-    //       widgets.add(Text(w.text+' '));
-    //   else if(w is ConcreteTextItem)
-    //     widgets.add(concreteWord(w.word,i));
-    // }
-    // return widgets;
     var wordsFound = 0;
     return widget.controller.textCtrl.text.split(' ').map(
       (e)
@@ -97,7 +88,6 @@ class _PreviewPredictionState extends State<PreviewPrediction> {
         else
         {
           wordsFound++;
-          //TODO: fix reading order
           return concreteWord((widget.controller.sentence[wordsFound-1] as ConcreteTextItem).word,wordsFound-1);
         }
       }

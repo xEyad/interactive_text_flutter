@@ -32,15 +32,18 @@ class PredictionMakerFieldController extends ChangeNotifier
 
   void toggleTextUpdates()
   {
-    _canUpdateText = !_canUpdateText;
+    // _canUpdateText = !_canUpdateText;
     print('${titleCtrl.text} set text updates is working to: $_canUpdateText');
   }
 
   void textListener()
   {
     if(!_canUpdateText) return;
+
+    if(previousText==textCtrl.text) return;
     updateSentence();
     notifyListeners();
+    previousText = textCtrl.text;
   }
 
   ///if null is returned, then it means no match found
@@ -66,47 +69,79 @@ class PredictionMakerFieldController extends ChangeNotifier
   void updateSentence()
   {
     if(!_canUpdateText) return;
-    final currentText = textCtrl.text;
 
-    // sentence.clear();
-    // for (var word in currentText.split(' ')) {
-    //   final predictionObj =  getPredictionWordObj(word);
-    //   if(predictionObj!=null)
-    //     sentence.add(ConcreteTextItem(ConcreteWord(predictionObj))); 
-    //   else
-    //     sentence.add(NormalTextItem(word));
-    // }
-    // notifyListeners();
-    
+    final currentText = textCtrl.text;    
     //check if the user is typing or removing
     final bool hasUserTypedNewWord = previousText.trim().split(' ').length < currentText.trim().split(' ').length;
     final bool hasUserRemovedWord = previousText.trim().split(' ').length > currentText.trim().split(' ').length;
     final bool hasUserTypedNewChar = currentText.length > previousText.length;
     final bool hasUserRemovedChar = currentText.length < previousText.length;
     final bool isLastWordATrigger = getPredictionWordObj(currentText.trim().split(' ').last) !=null;
-    if(hasUserTypedNewWord || (isLastWordATrigger && hasUserTypedNewChar))
-    {
-      final newWord = currentText.split(' ').last;
-      final predictionObj =  getPredictionWordObj(newWord);
+
+    final newSentence = currentText.trim().split(' ');
+    //generate new concrete sentence
+    final List<ConcreteWord> newConcreteSentence = [];
+    for (var element in newSentence) {
+      final predictionObj =  getPredictionWordObj(element);
       if(predictionObj!=null)
-      {
-        sentence.add(ConcreteTextItem(ConcreteWord(predictionObj))); 
-        notifyListeners();
-      }
-    }
-    else if(hasUserRemovedWord || hasUserRemovedChar)
-    {
-      final removedWord = previousText.split(' ').last;
-      final predictionObj =  getPredictionWordObj(removedWord);
-      if(predictionObj!=null)
-      {
-        sentence.remove(sentence.last); 
-        notifyListeners();
-      }
+        newConcreteSentence.add(ConcreteWord(predictionObj)); 
     }
 
-    //update prev text
-    previousText = textCtrl.text;
+    final curSentence = sentence;
+    
+    //changing in this case is wrong, cause it will be detected as replacement
+    if(newConcreteSentence.length == curSentence.length) return;
+
+    //compare it with current sentence to determine changed item
+    int? changeIndex;
+    for (var i = 0; i < newConcreteSentence.length; i++) 
+    {
+      if(i>=curSentence.length)
+      {
+        changeIndex = i;
+        break;
+      }
+
+      final newWord = newConcreteSentence[i];
+      final curWord = (curSentence[i] as ConcreteTextItem).word;
+      if(curWord.predictionItem.trigger != newWord.predictionItem.trigger)
+      {
+        changeIndex = i;
+        break;
+      }      
+    }
+    
+    if(hasUserRemovedChar && newConcreteSentence.length < curSentence.length && changeIndex == null)
+      changeIndex = curSentence.length - 1;
+    
+
+
+    //act on changed index whether it is insertion removal
+    if(newConcreteSentence.isEmpty && curSentence.isNotEmpty)
+    {
+      curSentence.clear();
+      notifyListeners();
+    }
+    else if(newConcreteSentence.length > curSentence.length)
+    {
+      curSentence.insert(changeIndex!, ConcreteTextItem(newConcreteSentence[changeIndex]));
+      notifyListeners();
+    }
+    else if(newConcreteSentence.length < curSentence.length)
+    {
+      curSentence.removeAt(changeIndex!);
+      notifyListeners();
+    }
+
+    /*
+    test cases:
+    add to end
+    remove from end
+    add (space) to start
+    add item to staret
+    remove space from center
+    remove item from center
+     */
   }
   
   @override
