@@ -5,7 +5,7 @@ import 'package:flutter/rendering.dart';
 import 'package:interactive_text/model/concreteWord.dart';
 import 'package:interactive_text/model/predictionItem.dart';
 import 'package:interactive_text/widgets/previewPrediction.dart';
-part 'predictionMakerFieldCtrl.dart';
+part '../../model/controllers/predictionMakerFieldCtrl.dart';
 
 class PredictionMakerField extends StatefulWidget {
   final VoidCallback? onDelete;
