@@ -21,7 +21,8 @@ class _PreviewPredictionState extends State<PreviewPrediction> {
 
   void onWordUpdated(ConcreteWord newWord,int indexInSentence)
   {
-    widget.controller.partiallyUpdateSentence(ConcreteTextItem(newWord),indexInSentence);    
+    final oldWord = widget.controller.sentence[indexInSentence];
+    widget.controller.partiallyUpdateSentence(ConcreteTextItem(newWord,location: oldWord.startIndex),indexInSentence);    
   }
 
   @override
@@ -71,6 +72,7 @@ class _PreviewPredictionState extends State<PreviewPrediction> {
       padding: EdgeInsets.all(10),
       child: Wrap(
         crossAxisAlignment: WrapCrossAlignment.center,
+        runSpacing: 10,
         children: widgetList,
       ),
     );

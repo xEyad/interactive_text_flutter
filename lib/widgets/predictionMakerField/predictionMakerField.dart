@@ -4,8 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:interactive_text/model/concreteWord.dart';
 import 'package:interactive_text/model/predictionItem.dart';
+import 'package:interactive_text/model/util.dart';
 import 'package:interactive_text/widgets/previewPrediction.dart';
-part '../../model/controllers/predictionMakerFieldCtrl.dart';
+part 'predictionMakerFieldCtrl.dart';
 
 class PredictionMakerField extends StatefulWidget {
   final VoidCallback? onDelete;

@@ -88,11 +88,27 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
+  void showInstructions()
+  {
+    showDialog(context: context, builder: (ctx){
+      return AlertDialog(
+        title: Text("What is this?"),
+        content: Text(
+"""Start typing words in the Text area and the preview widget will render all words typed.
+however, if it found any of these words: (cat,dog,mouse) it will render them differently cause these words gives you suggestions.
+click on the words, to open and pick a suggestion. Add sentence, adds new sentence which is saved indvidually and can be edited later by clicking on it.
+Sentences can be deleted or have it's title changed by clicking on it"""),
+actions: [FlatButton(onPressed: ()=>Navigator.pop(ctx), child: Text("Ok"))],
+      );
+    });
+  }
+  
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text("interactive text"),actions: [
-        IconButton(onPressed: openGithubSource, icon: Image.asset("assets/github.png"),tooltip: "Show source in github",)
+        IconButton(onPressed: showInstructions, icon: Icon(Icons.question_mark),tooltip: "What is this?",),
+        IconButton(onPressed: openGithubSource, icon: Image.asset("assets/github.png",color: Colors.white,),tooltip: "Show source in github",)
       ]),      
       body: Padding(
         padding: const EdgeInsets.all(18.0),
@@ -112,12 +128,6 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget instructions() {
-    return Text(
-"""Start typing words in the Text area and the preview widget will render all words typed.
-however, if it found any of these words: -- cat,dog,mouse -- it will render them differently cause these words gives you suggestions.
-click on the words, to open and pick a suggestion. """);
-  }
 
   Widget textInput()
   {
@@ -127,6 +137,8 @@ click on the words, to open and pick a suggestion. """);
       label = "Editing ${activeSentenceCtrl!.titleCtrl.text}";
     }
     return TextField( 
+      autocorrect: false,
+      enableInteractiveSelection: false,
       readOnly: activeSentenceCtrl==null,
       decoration: InputDecoration(
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),

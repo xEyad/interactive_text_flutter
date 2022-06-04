@@ -7,88 +7,225 @@
 
 // ignore_for_file: curly_braces_in_flow_control_structures
 
+
+import 'package:flutter/cupertino.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:interactive_text/model/predictionItem.dart';
 import 'package:interactive_text/widgets/predictionMakerField/predictionMakerField.dart';
 
-///-1 means no change
-int getChangeIndex(String oldStr, String newStr)
+
+
+void typeText(String text,TextEditingController ctrl)
 {
-  if(newStr.length > oldStr.length) //insertion
-  {
-    for (var i = oldStr.length-1; i >= 0; i--) 
-    {
-      final oldChar = oldStr[i];
-      final newChar = newStr[i+1];
-      final isOldCharShifted = oldChar == newChar;
-      if(!isOldCharShifted)      
-        return i+1; //change detected
-
-      if(isOldCharShifted && i==0) //this means insertion is the first character
-        return 0;
-    }
+  for (var i = 0; i < text.length; i++) {
+    ctrl.text += text[i];
   }
-  else if(newStr.length < oldStr.length) //deletion
-  {
-    for (var i = oldStr.length-1; i >= 0; i--) 
-    {      
-      if(i==0)
-        return 0; //this means that first character is deleted
-      final oldChar = oldStr[i];
-      final newChar = newStr[i-1];
-      final isOldCharShifted = oldChar == newChar;
-      if(!isOldCharShifted)      
-        return i; //change detected
-    }
-  }
-  else //same
-  {
-    return -1;
-  }
-
-  throw 'Unexpected error!';
 }
 
+void removeChar(TextEditingController ctrl,int indexToRemove)
+{
+  var txt = ctrl.text;
+  var firstPart = txt.substring(0,indexToRemove);
+  var lastPart = "";
+  if(indexToRemove<=txt.length)
+    lastPart = txt.substring(indexToRemove+1);
+
+  ctrl.text = firstPart + lastPart;
+}
+
+void removeText(TextEditingController ctrl,List<int> indicesToRemove)
+{
+  for (var i = 0; i < indicesToRemove.length; i++) {
+    final indexToRemove = indicesToRemove[i];
+    var firstPart = ctrl.text.substring(0,indexToRemove);
+    var lastPart = "";
+    if(indexToRemove<=ctrl.text.length)
+      lastPart = ctrl.text.substring(indexToRemove+1);
+
+    ctrl.text = firstPart + lastPart;
+
+    //update indicies numbers
+    for (var idx = i+1; idx < indicesToRemove.length; idx++) {
+      final futureIdxToRemove = indicesToRemove[idx];
+      if(futureIdxToRemove > indexToRemove)
+        indicesToRemove[idx]--; 
+    }
+  }
+  
+}
+
+void insertText(TextEditingController ctrl,int location,String text)
+{
+  assert(location<ctrl.text.length);
+  var txt = ctrl.text;
+  var firstPart = txt.substring(0,location);
+  var lastPart = "";
+  if(location<=txt.length)
+    lastPart = txt.substring(location);
+  
+  var textBuildUp = "";
+  for (var i = 0; i < text.length; i++) {
+    textBuildUp += text[i];
+    ctrl.text = firstPart + textBuildUp + lastPart;
+  }
+}
+
+  /*
+  test cases:
+  add to end
+  remove from end
+  add (space) to start
+  add item to staret
+  remove space from center
+  remove item from center
+    */
 void main() {
-  group('Detect string change location', (){
-
-    test('insertion at middle', (){
-      final changeIdx = getChangeIndex("mohsen","mohlsen");
-      expect(changeIdx, 3);
+  final predictionList = [
+  {
+    "trigger" : "cat",
+    "suggestions": ["tuna", "mice"]
+  },
+  {
+    "trigger" : "dog",
+    "suggestions": ["bones", "carrots"]
+  },
+  {
+    "trigger" : "mouse",
+    "suggestions": ["cheese", "apple"]
+  }
+  ].map((e) => PredictionItem.fromJson(e)).toList();
+  
+   group('[predictionMakerFieldController]',(){
+    test('detect No words after typing', ()  {
+      final ctrl = PredictionMakerFieldController(initialTitle: "",predictionList: predictionList);      
+      typeText("sayed hanfy",ctrl.textCtrl);  
+      expect(ctrl.sentence.length,0);
     });
 
-    test('insertion at start', (){
-      final changeIdx = getChangeIndex("mohlsen","smohlsen");
-      expect(changeIdx, 0);
+    test('detect 1 word after typing', () {
+      final ctrl = PredictionMakerFieldController(initialTitle: "",predictionList: predictionList);      
+      typeText("sayed cat hanfy",ctrl.textCtrl,);  
+      expect(ctrl.sentence.length,1,);
+      expect(ctrl.sentence[0].startIndex,6);
+      expect(ctrl.sentence[0].text,"cat");
     });
 
-    test('insertion at middle', (){
-      final changeIdx = getChangeIndex("smohlsen","smoohlsen");
-      expect(changeIdx, 2);
+    test('detect 2 words after typing', () {
+      final ctrl = PredictionMakerFieldController(initialTitle: "",predictionList: predictionList);      
+      typeText("sayed cat hanfy dog",ctrl.textCtrl,);  
+      expect(ctrl.sentence.length,2,);
+      expect(ctrl.sentence[0].startIndex,6);
+      expect(ctrl.sentence[1].startIndex,16);
+      expect(ctrl.sentence[0].text,"cat");
+      expect(ctrl.sentence[1].text,"dog");
     });
 
-    test('insertion at middle', (){
-      final changeIdx = getChangeIndex("smoohlsen","asmoohlsen");
-      expect(changeIdx, 0);
+    test('detect 2 words consecutive after typing', () {
+      final ctrl = PredictionMakerFieldController(initialTitle: "",predictionList: predictionList);      
+      typeText("sayed cat cat hanfy dog",ctrl.textCtrl,);  
+      expect(ctrl.sentence.length,3,);
+      expect(ctrl.sentence[0].startIndex,6);
+      expect(ctrl.sentence[1].startIndex,10);
+      expect(ctrl.sentence[2].startIndex,20);
+      expect(ctrl.sentence[0].text,"cat");
+      expect(ctrl.sentence[1].text,"cat");
+      expect(ctrl.sentence[2].text,"dog");
     });
 
-    test('insertion at middle', (){
-      final changeIdx = getChangeIndex("asmoohlsen","asmmoohlsen");
-      expect(changeIdx, 2);
+    test('detect 3 words consecutive after typing', () {
+      final ctrl = PredictionMakerFieldController(initialTitle: "",predictionList: predictionList);      
+      typeText("sayed cat cat dog hanfy dog",ctrl.textCtrl,);  
+      expect(ctrl.sentence.length,4,);
+      expect(ctrl.sentence[0].startIndex,6);
+      expect(ctrl.sentence[1].startIndex,10);
+      expect(ctrl.sentence[2].startIndex,14);
+      expect(ctrl.sentence[3].startIndex,24);
+      expect(ctrl.sentence[0].text,"cat");
+      expect(ctrl.sentence[1].text,"cat");
+      expect(ctrl.sentence[2].text,"dog");
+      expect(ctrl.sentence[3].text,"dog");
     });
 
-    test('deletion at middle', (){
-      final changeIdx = getChangeIndex("asmmoohlsen","asmmoolsen");
-      expect(changeIdx, 6);
+    test('detect 3 words consecutive after removing', () {
+      final ctrl = PredictionMakerFieldController(initialTitle: "",predictionList: predictionList);      
+      ctrl.textCtrl.text = "sayed cat cat dog hanfy dog";
+      removeChar(ctrl.textCtrl,26);  //"sayed cat cat dog hanfy do"
+      expect(ctrl.sentence.length,3,);
+      expect(ctrl.sentence[0].startIndex,6);
+      expect(ctrl.sentence[1].startIndex,10);
+      expect(ctrl.sentence[2].startIndex,14);
+      expect(ctrl.sentence[0].text,"cat");
+      expect(ctrl.sentence[1].text,"cat");
+      expect(ctrl.sentence[2].text,"dog");
     });
 
-    test('deletion at end', (){
-      final changeIdx = getChangeIndex("asmmoolsen","asmmoolse");
-      expect(changeIdx, 9);
+    test('detect 2 words consecutive after removing', () {
+      final ctrl = PredictionMakerFieldController(initialTitle: "",predictionList: predictionList);      
+      ctrl.textCtrl.text = "sayed cat cat dog hanfy dog";
+      removeChar(ctrl.textCtrl,26);  //"sayed cat cat dog hanfy do"
+      removeChar(ctrl.textCtrl,15);  //"sayed cat cat dg hanfy do"
+      expect(ctrl.sentence.length,2,);
+      expect(ctrl.sentence[0].startIndex,6);
+      expect(ctrl.sentence[1].startIndex,10);
+      expect(ctrl.sentence[0].text,"cat");
+      expect(ctrl.sentence[1].text,"cat");
     });
 
-    test('deletion at start', (){
-      final changeIdx = getChangeIndex("asmmoolse","smmoolse");
-      expect(changeIdx, 0);
+    test('detect 1 word after adding and removing 3 other', () {
+      final ctrl = PredictionMakerFieldController(initialTitle: "",predictionList: predictionList);      
+      ctrl.textCtrl.text = "sayed cat cat dog hanfy dog";
+      removeChar(ctrl.textCtrl,26);       //"sayed cat cat dog hanfy do"
+      removeChar(ctrl.textCtrl,15);       //"sayed cat cat dg hanfy do"
+      removeChar(ctrl.textCtrl,6);        //"sayed at cat dg hanfy do"
+      insertText(ctrl.textCtrl,8,'f');    //"sayed atf cat dg hanfy do"
+      expect(ctrl.sentence.length,1,);
+      expect(ctrl.sentence[0].startIndex,10);
+      expect(ctrl.sentence[0].text,"cat");
     });
+
+    test('detect 2 words after adding and removing others', () {
+      final ctrl = PredictionMakerFieldController(initialTitle: "",predictionList: predictionList);      
+      ctrl.textCtrl.text = "sayed cat cat dog hanfy dog";
+      removeChar(ctrl.textCtrl,26);       //"sayed cat cat dog hanfy do"
+      removeChar(ctrl.textCtrl,15);       //"sayed cat cat dg hanfy do"
+      removeChar(ctrl.textCtrl,6);        //"sayed at cat dg hanfy do"
+      insertText(ctrl.textCtrl,8,'f');    //"sayed atf cat dg hanfy do"
+      removeChar(ctrl.textCtrl,8);        //"sayed at cat dg hanfy do"
+      removeChar(ctrl.textCtrl,7);        //"sayed a cat dg hanfy do"
+      removeChar(ctrl.textCtrl,6);        //"sayed  cat dg hanfy do"
+      removeChar(ctrl.textCtrl,6);        //"sayed cat dg hanfy do"
+      insertText(ctrl.textCtrl,11,'o');   //"sayed cat dog hanfy do"
+      expect(ctrl.sentence.length,2,);
+      expect(ctrl.sentence[0].startIndex,6);
+      expect(ctrl.sentence[1].startIndex,10);
+      expect(ctrl.sentence[0].text,"cat");
+      expect(ctrl.sentence[1].text,"dog");
+    });
+
+    test('perfect match 3 words after manipulation', () {
+      final ctrl = PredictionMakerFieldController(initialTitle: "",predictionList: predictionList);      
+      ctrl.textCtrl.text = "Sayed cat cat wird happy dog";
+      removeText(ctrl.textCtrl,[12,11,10]);          // "Sayed cat wird happy dog"
+      insertText(ctrl.textCtrl,10,'cat');             // "Sayed cat cat wird happy dog"
+      expect(ctrl.sentence.length,3,);
+      expect(ctrl.sentence[0].startIndex,6);
+      expect(ctrl.sentence[1].startIndex,10);
+      expect(ctrl.sentence[2].startIndex,25);
+      expect(ctrl.sentence[0].text,"cat");
+      expect(ctrl.sentence[1].text,"cat");
+      expect(ctrl.sentence[2].text,"dog");
+    });
+
+    test('perfect match 3 words after removing space from end', () {
+      final ctrl = PredictionMakerFieldController(initialTitle: "",predictionList: predictionList);      
+      ctrl.textCtrl.text = "Sayed cat cat ";
+      removeText(ctrl.textCtrl,[12,11,10]);          // "Sayed cat "      
+      expect(ctrl.sentence.length,2,);
+      expect(ctrl.sentence[0].startIndex,6);
+      expect(ctrl.sentence[1].startIndex,10);
+      expect(ctrl.sentence[0].text,"cat");
+      expect(ctrl.sentence[1].text,"cat");
+    });
+
   });
 }

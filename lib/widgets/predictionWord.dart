@@ -19,7 +19,7 @@ class _PredictionWordState extends State<PredictionWord> {
   ConcreteWord get word => ConcreteWord(predictionItem,selection);
   String? selection;
   PredictionItem get predictionItem =>  widget.predictionItem;
-  String get species => predictionItem.trigger;
+  String get trigger => predictionItem.trigger;
   List <String> get predictionItems => predictionItem.suggestions;
 
   @override
@@ -65,7 +65,7 @@ class _PredictionWordState extends State<PredictionWord> {
         mainAxisSize: MainAxisSize.min,
         mainAxisAlignment: MainAxisAlignment.center,
             children: [
-            Text(species,style: TextStyle(color: clr),),
+            Text(trigger,style: TextStyle(color: clr),),
             selection==null ? SizedBox() : Text(selection!,style: TextStyle(color: clr))
           ]),
         ],
