@@ -216,15 +216,25 @@ void main() {
       expect(ctrl.sentence[2].text,"dog");
     });
 
-    test('perfect match 3 words after removing space from end', () {
+    test('perfect match 1 word after removing space from end', () {
       final ctrl = PredictionMakerFieldController(initialTitle: "",predictionList: predictionList);      
       ctrl.textCtrl.text = "Sayed cat cat ";
-      removeText(ctrl.textCtrl,[12,11,10]);          // "Sayed cat "      
+      removeText(ctrl.textCtrl,[12,11,10]);          // "Sayed cat  "      
+      expect(ctrl.sentence.length,1,);
+      expect(ctrl.sentence[0].startIndex,6);
+      expect(ctrl.sentence[0].text,"cat");
+    });
+
+     test('perfect match 2 words after manipulation and alot of trimmed spaces', () {
+      final ctrl = PredictionMakerFieldController(initialTitle: "",predictionList: predictionList);      
+      ctrl.textCtrl.text = "Sayed cat cat ";
+      removeText(ctrl.textCtrl,[12,11,10]);          // "Sayed cat  "      
+      insertText(ctrl.textCtrl, 10, "dog");           // "Sayed cat dog "
       expect(ctrl.sentence.length,2,);
       expect(ctrl.sentence[0].startIndex,6);
-      expect(ctrl.sentence[1].startIndex,10);
       expect(ctrl.sentence[0].text,"cat");
-      expect(ctrl.sentence[1].text,"cat");
+      expect(ctrl.sentence[1].startIndex,10);
+      expect(ctrl.sentence[1].text,"dog");
     });
 
   });

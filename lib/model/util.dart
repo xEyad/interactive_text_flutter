@@ -4,7 +4,7 @@ class Util
   ///this function detects change based only in difference of 1, which means adding or removing 1 char only
   static int getChangeIndex(String oldStr, String newStr)
   {
-    // assert((oldStr.length-newStr.length).abs() == 1);
+    assert((oldStr.length-newStr.length).abs() == 1);
     if(newStr.length > oldStr.length) //insertion
     {
       if(oldStr.isEmpty) return 0;

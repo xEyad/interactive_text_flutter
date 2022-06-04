@@ -69,11 +69,14 @@ class PredictionMakerFieldController extends ChangeNotifier
 
   void updateSentence()
   {
+    final currentText = textCtrl.text;  
+      
     if(!_canUpdateText) return;
-    final currentText = textCtrl.text;    
-    int changeIndex = Util.getChangeIndex(previousText.trim(), currentText.trim());
-    bool isInsertion = currentText.trim().length > previousText.trim().length;
-    bool isDeletion = currentText.trim().length < previousText.trim().length;
+    if((previousText.length-currentText.length).abs() != 1) return;
+
+    int changeIndex = Util.getChangeIndex(previousText, currentText);
+    bool isInsertion = currentText.length > previousText.length;
+    bool isDeletion = currentText.length < previousText.length;
 
     //check if this affects existing words, basically if the new char is inserted/removed directly inside an existing word
     final affectedWord = findWordAt(changeIndex);
